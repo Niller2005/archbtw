@@ -23,6 +23,11 @@ Arch Linux post-install automation for a Wayland setup using:
 ## Prerequisites
 
 - Fresh Arch install with internet access
+- Enable networking with NetworkManager:
+
+```bash
+sudo systemctl enable --now NetworkManager
+```
 - A regular user account with `sudo` access
 - Run from user session (not as root)
 
@@ -31,7 +36,6 @@ Arch Linux post-install automation for a Wayland setup using:
 From this repository:
 
 ```bash
-sudo systemctl enable --now NetworkManager
 chmod +x setup.sh
 ./setup.sh
 ```

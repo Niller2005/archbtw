@@ -1,0 +1,40 @@
+// Basic Niri config with Ghostty + Noctalia
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+    }
+    warp-mouse-to-focus false
+    focus-follows-mouse false
+}
+
+output "eDP-1" {
+    scale 1.0
+}
+
+cursor {
+    xcursor-theme "Adwaita"
+    xcursor-size 24
+}
+
+spawn-at-startup "noctalia-shell"
+spawn-at-startup "mako"
+spawn-at-startup "xwayland-satellite"
+
+binds {
+    Mod+Return { spawn "ghostty"; }
+    Mod+E { spawn "ghostty" "-e" "nvim"; }
+    Mod+D { spawn "fuzzel"; }
+    Mod+Shift+Q { close; }
+    Mod+F { fullscreen; }
+    Mod+H { focus-monitor-left; }
+    Mod+J { focus-window-down; }
+    Mod+K { focus-window-up; }
+    Mod+L { focus-monitor-right; }
+    Mod+Shift+H { move-window-left; }
+    Mod+Shift+J { move-window-down; }
+    Mod+Shift+K { move-window-up; }
+    Mod+Shift+L { move-window-right; }
+    Mod+Shift+L { spawn "swaylock" "-f" "-c" "000000"; }
+}

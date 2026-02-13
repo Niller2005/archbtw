@@ -27,6 +27,22 @@ fi
 echo "Installing core packages..."
 
 sudo pacman -Syu --noconfirm --needed \
+    base-devel \
+    git \
+    coreutils \
+    curl \
+    unzip \
+    stow \
+    oh-my-posh \
+    ripgrep \
+    tree-sitter \
+    lazygit \
+    bottom \
+    nodejs \
+    bun \
+    go \
+    python \
+    zsh \
     niri \
     ghostty \
     neovim \
@@ -43,13 +59,35 @@ sudo pacman -Syu --noconfirm --needed \
     wireplumber \
     qt5-wayland \
     qt6-wayland \
-    ttf-jetbrains-mono-nerd
+    ttf-jetbrains-mono-nerd \
+    ttf-meslo-nerd
 
 # Noctalia from AUR
 echo "Installing noctalia-shell from AUR..."
 paru -S --noconfirm --needed noctalia-shell
 
 echo "Packages installed."
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="$SCRIPT_DIR/dotfiles"
+STOW_TARGET="$HOME"
+if [ ! -d "$DOTFILES_DIR" ]; then
+    echo "Missing dotfiles directory at $DOTFILES_DIR"
+    exit 1
+fi
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 2.1 Set zsh as default shell if needed
+# ────────────────────────────────────────────────────────────────────────────────
+if [ "${SHELL:-}" != "$(command -v zsh)" ]; then
+    echo "Setting zsh as default shell..."
+    chsh -s "$(command -v zsh)" "$USER"
+fi
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 2.2 Oh My Posh (powerlevel10k_lean) for zsh
+# ────────────────────────────────────────────────────────────────────────────────
+echo "Setting up Oh My Posh theme..."
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 3. Install AstroNvim (using official template)
@@ -75,133 +113,34 @@ echo "AstroNvim installed."
 # ────────────────────────────────────────────────────────────────────────────────
 echo "Adding Noctalia dynamic theme support to Neovim..."
 
-# Create matugen module (from Noctalia docs)
-mkdir -p ~/.config/nvim/lua/matugen
-cat > ~/.config/nvim/lua/matugen/init.lua << 'EOF'
-local M = {}
-
-function M.setup()
-    require('base16-colorscheme').setup {
-        -- Background tones
-        base00 = '{{colors.surface.default.hex}}', -- Default Background
-        base01 = '{{colors.surface_container.default.hex}}', -- Lighter Background (status bars)
-        base02 = '{{colors.surface_container_high.default.hex}}', -- Selection Background
-        base03 = '{{colors.outline.default.hex}}', -- Comments, Invisibles
-
-        -- Foreground tones
-        base04 = '{{colors.on_surface_variant.default.hex}}', -- Dark Foreground (status bars)
-        base05 = '{{colors.on_surface.default.hex}}', -- Default Foreground
-        base06 = '{{colors.on_surface.default.hex}}', -- Light Foreground
-        base07 = '{{colors.on_background.default.hex}}', -- Lightest Foreground
-
-        -- Accent colors
-        base08 = '{{colors.error.default.hex}}', -- Variables, XML Tags, Errors
-        base09 = '{{colors.tertiary.default.hex}}', -- Integers, Constants
-        base0A = '{{colors.secondary.default.hex}}', -- Classes, Search Background
-        base0B = '{{colors.primary.default.hex}}', -- Strings, Diff Inserted
-        base0C = '{{colors.tertiary_fixed_dim.default.hex}}', -- Regex, Escape Chars
-        base0D = '{{colors.primary_fixed_dim.default.hex}}', -- Functions, Methods
-        base0E = '{{colors.secondary_fixed_dim.default.hex}}', -- Keywords, Storage
-        base0F = '{{colors.error_container.default.hex}}', -- Deprecated, Embedded Tags
-    }
-end
-
--- Reload on SIGUSR1 (sent by Noctalia template post-hook)
-local signal = vim.uv.new_signal()
-signal:start(
-    'sigusr1',
-    vim.schedule_wrap(function()
-        package.loaded['matugen'] = nil
-        require('matugen').setup()
-        vim.cmd('colorscheme base16')  -- Ensure reload
-    end)
-)
-
-return M
-EOF
-
-# Add to AstroNvim user config (safe append/create)
-USER_INIT=~/.config/nvim/lua/user/init.lua
-mkdir -p ~/.config/nvim/lua/user
-
-if ! grep -q "require('matugen').setup()" "$USER_INIT" 2>/dev/null; then
-    cat >> "$USER_INIT" << 'EOF'
-
--- Noctalia dynamic theme integration
-require('matugen').setup()
-vim.cmd('colorscheme base16')  -- or set in AstroCommunity if preferred
-EOF
-    echo "Added Noctalia theme loader to $USER_INIT"
-else
-    echo "Noctalia theme loader already in $USER_INIT — skipped"
-fi
-
-# Add Noctalia user template for auto-updates
-mkdir -p ~/.config/noctalia
-cat >> ~/.config/noctalia/user-templates.toml << 'EOF'
-
-[templates.nvim-base16]
-input_path = "~/.config/nvim/lua/matugen/init.lua"
-output_path = "~/.config/nvim/lua/matugen/generated.lua"  # optional: can symlink or adjust
-post_hook = "pkill -SIGUSR1 nvim"
-EOF
-
-echo "Noctalia Neovim template added (enable User Templates in Noctalia Settings → Color Scheme → Templates → Advanced)."
+echo "Noctalia Neovim template ready (enable User Templates in Noctalia Settings → Color Scheme → Templates → Advanced)."
 echo " → Change color scheme in Noctalia → Neovim auto-updates via SIGUSR1"
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 5. Setup Niri config (~/.config/niri/config.kdl)
 # ────────────────────────────────────────────────────────────────────────────────
 echo "Setting up Niri config..."
-
-mkdir -p ~/.config/niri
-
 niri --config ~/.config/niri/config.kdl >/dev/null 2>&1 || true
-
-cat > ~/.config/niri/config.kdl << 'EOF'
-// Basic Niri config with Ghostty + Noctalia
-input {
-    keyboard {
-        xkb {
-            layout "us"
-        }
-    }
-    warp-mouse-to-focus false
-    focus-follows-mouse false
-}
-
-output "eDP-1" {
-    scale 1.0
-}
-
-cursor {
-    xcursor-theme "Adwaita"
-    xcursor-size 24
-}
-
-spawn-at-startup "noctalia-shell"
-spawn-at-startup "mako"
-spawn-at-startup "xwayland-satellite"
-
-binds {
-    Mod+Return { spawn "ghostty"; }
-    Mod+E { spawn "ghostty" "-e" "nvim"; }
-    Mod+D { spawn "fuzzel"; }
-    Mod+Shift+Q { close; }
-    Mod+F { fullscreen; }
-    Mod+H { focus-monitor-left; }
-    Mod+J { focus-window-down; }
-    Mod+K { focus-window-up; }
-    Mod+L { focus-monitor-right; }
-    Mod+Shift+H { move-window-left; }
-    Mod+Shift+J { move-window-down; }
-    Mod+Shift+K { move-window-up; }
-    Mod+Shift+L { move-window-right; }
-    Mod+Shift+L { spawn "swaylock" "-f" "-c" "000000"; }
-}
-EOF
-
 echo "Niri config updated → Super+E opens Neovim with Noctalia theme"
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 5.1 Stow configs into place
+# ────────────────────────────────────────────────────────────────────────────────
+backup_if_exists() {
+    local target="$1"
+    if [ -e "$target" ] && [ ! -L "$target" ]; then
+        mv "$target" "$target.bak.$(date +%s)"
+    fi
+}
+
+backup_if_exists "$HOME/.config/nvim/lua/matugen/init.lua"
+backup_if_exists "$HOME/.config/nvim/lua/user/init.lua"
+backup_if_exists "$HOME/.config/noctalia/user-templates.toml"
+backup_if_exists "$HOME/.config/niri/config.kdl"
+backup_if_exists "$HOME/.config/oh-my-posh/powerlevel10k_lean.omp.json"
+backup_if_exists "$HOME/.zshrc"
+
+stow -d "$DOTFILES_DIR" -t "$STOW_TARGET" nvim niri noctalia oh-my-posh zsh
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 6. Optional: Auto-start Niri from tty1
