@@ -32,6 +32,33 @@ sudo systemctl enable --now NetworkManager
 - A regular user account with `sudo` access
 - Run from user session (not as root)
 
+## Arch install outline (very condensed)
+
+If you need to install Arch itself, follow the official guide for the full, up-to-date procedure. Below is a *minimal outline* for reference only:
+
+1. Boot the Arch ISO and connect to the internet.
+2. Partition and format disks (EFI + root at minimum).
+3. Mount filesystems under `/mnt`.
+4. Install base system:
+
+```bash
+pacstrap -K /mnt base linux linux-firmware networkmanager sudo git
+```
+
+5. Generate fstab and chroot:
+
+```bash
+genfstab -U /mnt >> /mnt/etc/fstab
+arch-chroot /mnt
+```
+
+6. Set timezone, locale, hostname, and root password.
+7. Enable `NetworkManager` and install a bootloader (systemd-boot or GRUB).
+8. Create a normal user and add them to `wheel`, enable sudo, then reboot.
+
+For complete steps and troubleshooting, use the official install guide:
+https://wiki.archlinux.org/title/Installation_guide
+
 ## Fresh Arch install (quick run-through)
 
 This script is meant to be run *after* a base Arch install and first boot. If you are starting from scratch, a minimal checklist looks like this:
