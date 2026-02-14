@@ -34,6 +34,11 @@ sudo pacman -Syu --noconfirm --needed \
     unzip \
     stow \
     oh-my-posh \
+    fzf \
+    eza \
+    bat \
+    zoxide \
+    cbonsai \
     ripgrep \
     tree-sitter \
     lazygit \
