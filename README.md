@@ -32,6 +32,34 @@ sudo systemctl enable --now NetworkManager
 - A regular user account with `sudo` access
 - Run from user session (not as root)
 
+## Fresh Arch install (quick run-through)
+
+This script is meant to be run *after* a base Arch install and first boot. If you are starting from scratch, a minimal checklist looks like this:
+
+1. Install Arch and boot into the new system (base + kernel + firmware).
+2. Create a normal user and configure sudo (e.g., add to `wheel` and enable sudo in `/etc/sudoers`).
+3. Enable networking and reboot into your new system:
+
+```bash
+sudo systemctl enable --now NetworkManager
+```
+
+4. Log in as your normal user and clone this repo:
+
+```bash
+git clone https://github.com/Niller2005/archbtw.git
+cd archbtw
+```
+
+5. Run the setup script:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+If you already have a base Arch install with sudo and networking working, you can jump directly to the Usage section.
+
 ## Usage
 
 From this repository:
