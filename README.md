@@ -16,9 +16,10 @@ Arch Linux post-install automation for a Wayland setup using:
 2. Installs core packages with `pacman`.
 3. Installs `noctalia-shell` from AUR.
 4. Backs up existing Neovim state and installs AstroNvim template to `~/.config/nvim`.
-5. Adds Noctalia/Matugen integration for dynamic Neovim recoloring.
-6. Writes a starter Niri config to `~/.config/niri/config.kdl`.
-7. Optionally configures autologin on `tty1` and auto-starts Niri from `~/.bash_profile`.
+5. Stows repo-managed dotfiles into `~` (Niri, Noctalia, Neovim, Oh My Posh, Zsh).
+6. Adds Noctalia/Matugen integration for dynamic Neovim recoloring.
+7. Writes a starter Niri config to `~/.config/niri/config.kdl` (via stow).
+8. Optionally configures autologin on `tty1` and auto-starts Niri from `~/.bash_profile`.
 
 ## Prerequisites
 
@@ -42,12 +43,24 @@ chmod +x setup.sh
 
 You will be prompted whether to configure autologin + auto-start on `tty1`.
 
+## Dotfiles (GNU Stow)
+
+Dotfiles live under `dotfiles/` and are linked into `~` with GNU Stow during setup:
+
+- `dotfiles/niri` → `~/.config/niri`
+- `dotfiles/noctalia` → `~/.config/noctalia`
+- `dotfiles/nvim` → `~/.config/nvim`
+- `dotfiles/oh-my-posh` → `~/.config/oh-my-posh`
+- `dotfiles/zsh` → `~/.zshrc`
+
 ## What gets modified
 
 - `~/.config/nvim` (AstroNvim template + theme integration)
 - `~/.local/share/nvim`, `~/.local/state/nvim`, `~/.cache/nvim` (backed up if present)
 - `~/.config/noctalia/user-templates.toml`
 - `~/.config/niri/config.kdl`
+- `~/.config/oh-my-posh/powerlevel10k_lean.omp.json`
+- `~/.zshrc`
 - `~/.bash_profile` (if autostart is enabled)
 - `getty@tty1.service` override (if autologin is enabled)
 
@@ -70,6 +83,7 @@ You will be prompted whether to configure autologin + auto-start on `tty1`.
 
 - Existing Neovim config is moved to `~/.config/nvim.bak` if present.
 - The script is intentionally opinionated and overwrites the Niri config file.
+- Zsh config includes Zinit, FZF, Zoxide, and Oh My Posh initialization.
 
 ## References
 
